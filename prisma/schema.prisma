@@ -1,0 +1,163 @@
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Contact {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String?
+  serviceType String
+  message     String
+  status      String   @default("new")
+  createdAt   DateTime @default(now())
+  ipAddress   String? 
+}
+
+model InternshipApplication {
+  id                String   @id @default(uuid())
+  fullName          String
+  email             String
+  phone             String?
+  linkedinUrl       String?
+  resumeUrl         String?
+  portfolioUrl      String?
+  coverLetter       String?
+  position          String
+  status            String   @default("pending")
+  preferredStartDate DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model NewsletterSubscriber {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  unsubscribeToken String?  @unique
+  isActive       Boolean   @default(true)
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+}
+
+model Project {
+  id             String   @id @default(uuid())
+  title          String
+  slug           String   @unique
+  description    String
+  challenge      String?
+  solution       String?
+  results        String?
+  images         String   // JSON string
+  techStack      String   // JSON string
+  category       String
+  clientName     String?
+  completionDate DateTime?
+  featured       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+model BlogPost {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  excerpt       String?
+  content       String
+  featuredImage String?
+  author        String?
+  publishedDate DateTime?
+  updatedAt     DateTime @updatedAt
+  tags          String   // JSON string
+  category      String?
+  readTime      Int?
+  isPublished   Boolean  @default(false)
+  viewsCount    Int      @default(0)
+}
+
+model InternshipPosition {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  requirements    String   // JSON string
+  responsibilities String  // JSON string
+  duration        String?
+  type            String
+  postedDate      DateTime @default(now())
+  isActive        Boolean  @default(true)
+  applicationCount Int     @default(0)
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  clientName  String
+  company     String?
+  role        String?
+  content     String
+  rating      Int
+  imageUrl    String?
+  projectId   String?
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  price       String?
+  features    String? // JSON
+}
+
+// NextAuth Models
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("admin")
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
